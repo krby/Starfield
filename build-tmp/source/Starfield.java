@@ -14,14 +14,14 @@ import java.io.IOException;
 
 public class Starfield extends PApplet {
 
-NormalParticle[] particles;
-int numParticles  = 100;
+Particle[] particles;
+int numParticles  = 1000;
 
 int scrnSz = 512;
+
 public void setup()
 {
 	size(scrnSz, scrnSz);
-
 	particles = new NormalParticle[numParticles];
 	for(int i = 0; i < particles.length; i++)
 	{
@@ -32,9 +32,13 @@ public void setup()
 public void draw()
 {
 	background(0, 10);
+	
+
+
 	for(int i = 0; i < particles.length; i++)
 	{
 		particles[i].move();
+		particles[i].centerWrap();
 		particles[i].show();
 	}
 }
@@ -48,7 +52,7 @@ public void mousePressed()
 	redraw();
 }
 
-class NormalParticle
+class NormalParticle implements Particle
 {
 	double dx, dy, dTheta, dSpeed;
 	int myColor, partSize;
@@ -58,7 +62,7 @@ class NormalParticle
 		dx = scrnSz/2;
 		dy = scrnSz/2;
 		dTheta = Math.random()*2*Math.PI;
-		dSpeed = Math.random()*2+1;
+		dSpeed = Math.random()*3;
 
 		//appearance 
 		myColor = color((int)(Math.random()*255), (int)(Math.random()*255), (int)(Math.random()*255));
@@ -71,6 +75,15 @@ class NormalParticle
 		dy = dy + Math.sin(dTheta)*dSpeed;
 	}
 
+	public void centerWrap() //comes back to center 
+	{
+		if (dx >= scrnSz || dx <= 0 || dy >= scrnSz || dy <= 0)
+		{
+			dx = scrnSz/2;
+			dy = scrnSz/2;
+		}
+	}
+
 	public void show()
 	{
 		fill(myColor); 
@@ -81,7 +94,9 @@ class NormalParticle
 
 interface Particle
 {
-	//your code here
+	public void move();
+	public void centerWrap();
+	public void show();
 };
 
 class OddballParticle
