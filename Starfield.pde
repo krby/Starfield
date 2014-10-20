@@ -2,6 +2,8 @@ Particle[] particles;
 int numParticles  = 1000;
 
 int scrnSz = 512;
+int locationX = scrnSz/2;
+int locationY = scrnSz/2;
 
 void setup()
 {
@@ -9,9 +11,17 @@ void setup()
 	particles = new Particle[numParticles];
 	for(int i = 1; i < particles.length; i++)
 	{
-		particles[i] = new NormalParticle();
+		if (i%100 == 0)
+		{
+			particles[i] = new JumboParticle(locationX, locationY);
+		} 
+		else
+		{
+			particles[i] = new NormalParticle(locationX, locationY);	
+		}
+		
 	}
-	particles[0] = new OddballParticle();
+	particles[0] = new OddballParticle(locationX, locationY);
 }
 
 void draw()
@@ -28,12 +38,9 @@ void draw()
 
 void mousePressed()
 {
-	for(int i = 1; i < particles.length; i++)
-	{
-		particles[i] = new NormalParticle();
-	}
-	particles[0] = new OddballParticle();
-
+	locationX = mouseX;
+	locationY = mouseY;
+	setup();
 	redraw();
 }
 
@@ -51,7 +58,19 @@ class NormalParticle implements Particle
 	double dx, dy, dTheta, dSpeed;
 	int myColor, partSize;
 
-	NormalParticle()
+	NormalParticle(int myX, int myY)
+	{
+		dx = myX;
+		dy = myY;
+		dTheta = Math.random()*2*Math.PI;
+		dSpeed = Math.random()*3;
+
+		//appearance 
+		myColor = color((int)(Math.random()*255), (int)(Math.random()*255), (int)(Math.random()*255));
+		partSize = (int)(Math.random()*3+1);
+	}
+
+	NormalParticle() //default constr
 	{
 		dx = scrnSz/2;
 		dy = scrnSz/2;
@@ -82,7 +101,17 @@ class NormalParticle implements Particle
 	{
 		fill(myColor); 
 		noStroke();
-		//ellipse((float)dx, (float)dy, partSize, partSize);
+		ellipse((float)dx, (float)dy, partSize, partSize);
+	}
+};
+
+class JumboParticle extends NormalParticle
+{
+	JumboParticle(int myX, int myY)
+	{
+		partSize = (int)(Math.random()*3+10); //particle is simply larger
+		dx = myX;
+		dy = myY;
 	}
 };
 
@@ -91,10 +120,10 @@ class OddballParticle implements Particle
 	double dx, dy, dTheta, dSpeed;
 	int myColor, partSize;
 
-	OddballParticle()
+	OddballParticle(int myX, int myY)
 	{
-		dx = scrnSz/2;
-		dy = scrnSz/2;
+		dx = myX;
+		dy = myY;
 		dTheta = Math.random()*2*Math.PI; //direction the particles moves
 		dSpeed = 40; //Math.random()*3;
 
@@ -108,7 +137,7 @@ class OddballParticle implements Particle
 		dx = dx + Math.cos(dTheta)*dSpeed;
 		dy = dy + Math.sin(dTheta)*dSpeed;
 
-		dTheta++;
+		dTheta+=1.05;
 	}
 
 	public void centerWrap() //comes back to center 
