@@ -16,14 +16,18 @@ public class Starfield extends PApplet {
 
 Particle[] particles;
 int numParticles  = 1000;
-
 int scrnSz = 512;
-int locationX = scrnSz/2;
+int locationX = scrnSz/2; 
 int locationY = scrnSz/2;
+
+//key functions
+boolean centerWrap = false;
+boolean twist = false;
 
 public void setup()
 {
 	size(scrnSz, scrnSz);
+
 	particles = new Particle[numParticles];
 	for(int i = 1; i < particles.length; i++)
 	{
@@ -46,8 +50,18 @@ public void draw()
 
 	for(int i = 0; i < particles.length; i++)
 	{
-		particles[i].move();
-		//particles[i].centerWrap();
+		if (twist == true)
+		{
+			particles[i].move(true);
+		}
+		else
+		{
+			particles[i].move(false);
+		}
+		if (centerWrap == true)
+		{
+			particles[i].centerWrap();
+		}
 		particles[i].show();
 	}
 }
@@ -60,11 +74,23 @@ public void mousePressed()
 	redraw();
 }
 
+public void keyReleased()
+{
+	if (key == 'w')
+	{	
+		centerWrap = !centerWrap;
+	}
+	if (key == 'e')
+	{
+		twist = !twist;
+	}
+}
+
 
 //-------define classes-------
 interface Particle
 {
-	public void move();
+	public void move(boolean twist);
 	public void centerWrap();
 	public void show();
 };
@@ -88,8 +114,8 @@ class NormalParticle implements Particle
 
 	NormalParticle() //default constr
 	{
-		dx = scrnSz/2;
-		dy = scrnSz/2;
+		dx = width/2;
+		dy = height/2;
 		dTheta = Math.random()*2*Math.PI;
 		dSpeed = Math.random()*3;
 
@@ -98,18 +124,22 @@ class NormalParticle implements Particle
 		partSize = (int)(Math.random()*3+1);
 	}
 
-	public void move()
+	public void move(boolean twist)
 	{
 		dx = dx + Math.cos(dTheta)*dSpeed;
 		dy = dy + Math.sin(dTheta)*dSpeed;
+		if (twist == true)
+		{
+			dTheta += 0.05f;	
+		}
 	}
 
 	public void centerWrap() //comes back to center 
 	{
-		if (dx >= scrnSz || dx <= 0 || dy >= scrnSz || dy <= 0)
+		if (dx >= width || dx <= 0 || dy >= height || dy <= 0)
 		{
-			dx = scrnSz/2;
-			dy = scrnSz/2;
+			dx = locationX;
+			dy = locationY;
 		}
 	}
 
@@ -141,27 +171,36 @@ class OddballParticle implements Particle
 		dx = myX;
 		dy = myY;
 		dTheta = Math.random()*2*Math.PI; //direction the particles moves
-		dSpeed = 40; //Math.random()*3;
+		dSpeed = 8; //Math.random()*3;
 
 		//appearance 
 		myColor = color((int)(Math.random()*255), (int)(Math.random()*255), (int)(Math.random()*255));
 		partSize = 10;
 	}
 
-	public void move()
+	double index = 0;
+	public void move(boolean twist)
 	{
 		dx = dx + Math.cos(dTheta)*dSpeed;
 		dy = dy + Math.sin(dTheta)*dSpeed;
 
-		dTheta+=1.05f;
+		if (index <= 0) //wobble, by alternating angle
+		{
+			dTheta = -dTheta;
+		}
+		else if (index >= 1)
+		{
+			dTheta = dTheta;
+		}
+		dTheta += 0.75f;
 	}
 
 	public void centerWrap() //comes back to center 
 	{
-		if (dx >= scrnSz || dx <= 0 || dy >= scrnSz || dy <= 0)
+		if (dx >= width || dx <= 0 || dy >= height || dy <= 0)
 		{
-			dx = scrnSz/2;
-			dy = scrnSz/2;
+			dx = locationX;
+			dy = locationY;
 		}
 	}
 
